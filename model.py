@@ -28,6 +28,7 @@ class GrowNet(object):
                 layer[:alternate.size()[0],:alternate.size()[1]]=alternate
         
         self._model = newModel
+        self._currentLayers = size
 
     def deepen(self, new_layer_width):
         size = self._currentLayers.copy()
@@ -44,6 +45,7 @@ class GrowNet(object):
                     layer[:alternate.size()[0],:alternate.size()[1]]=alternate
             
         self._model = newModel
+        self._currentLayers = size
         
 
 
