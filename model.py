@@ -4,17 +4,30 @@ import torch.nn.functional as F
 
 class GrowNet(object):
 
-    def __init__(self,inputSize,outputSize,startLayers=[64,64],max_width=512,max_depth=3):
+    def __init__(self,inputSize,outputSize,startLayers=[64,64],maxWidth=512,maxDepth=3):
         self._model = GrowNetSubModel(inputSize,outputSize,startLayers)
         self._inputSize = inputSize
         self._outputSize = outputSize
         self._currentLayers = startLayers
+        self._maxWidth = maxWidth
+        self._maxDepth = maxDepth
 
     def grow(self):
-        pass
-        #currentState = self._model.state_dict()
+        for i, layer in enumerate(self._currentLayers):
+            if layer!=self._maxWidth:
+                newWidth = min(layer*2,self._maxWidth)
+                self._widen(newWidth,i)
+                
+                return ((i+1)==self._maxDepth)&(newWidth==self._maxWidth)
+        
+        if len(self._currentLayers)<self._maxDepth:
+            self._deepen(self._maxWidth//4)
+            return False
+        else:
+            return True
+        
     
-    def widen(self,new_width,layer):
+    def _widen(self,new_width,layer):
         size = self._currentLayers.copy()
         size[layer]=new_width
 
@@ -30,7 +43,7 @@ class GrowNet(object):
         self._model = newModel
         self._currentLayers = size
 
-    def deepen(self, new_layer_width):
+    def _deepen(self, new_layer_width):
         size = self._currentLayers.copy()
         size.append(new_layer_width)
 
