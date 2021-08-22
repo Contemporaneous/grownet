@@ -1,3 +1,5 @@
+from typing import TYPE_CHECKING
+from typing_extensions import ParamSpecArgs
 import torch
 import torch.nn as nn
 import torch.nn.functional as F
@@ -15,9 +17,9 @@ class GrowNet(object):
         self._growthPattern = growthPattern
 
     def grow(self):
-        if self._growthPattern==GrowthPattern.BreadthFirst:
+        if GrowthPattern.BreadthFirst in self._growthPattern:
             return self._growBreadthFirst()
-        elif self._growthPattern==GrowthPattern.DepthFirst:
+        elif GrowthPattern.DepthFirst in self._growthPattern:
             return self._growDepthFirst()
         else:
             raise NotImplementedError('Growth Pattern %s not Implemented' % self._growthPattern)
@@ -25,13 +27,20 @@ class GrowNet(object):
     def _growBreadthFirst(self):
         for i, layer in enumerate(self._currentLayers):
             if layer!=self._maxWidth:
-                newWidth = min(layer*2,self._maxWidth)
+                if GrowthPattern.Slow in self._growthPattern:
+                    newWidth = min(layer+1,self._maxWidth)
+                else:
+                    newWidth = min(layer*2,self._maxWidth)
                 self._widen(newWidth,i)
                 
                 return ((i+1)==self._maxDepth)&(newWidth==self._maxWidth)
         
         if len(self._currentLayers)<self._maxDepth:
-            self._deepen(self._maxWidth//4)
+            if GrowthPattern.Slow in self._growthPattern:
+                newWith = 2
+            else:
+                newWidth = self._maxWidth//4
+            self._deepen(newWidth)
             return False
         else:
             return True
@@ -39,12 +48,21 @@ class GrowNet(object):
     def _growDepthFirst(self):
         
         if len(self._currentLayers)<self._maxDepth:
-            self._deepen(max(1,self._currentLayers[-1]//2))
+            if GrowthPattern.Slow in self._growthPattern:
+                newWidth = 2 
+            else:
+                newWidth = max(1,self._currentLayers[-1]//2)
+            
+            self._deepen(newWidth)
+
             return False
 
         for i, layer in enumerate(self._currentLayers):
             if layer!=self._maxWidth:
-                newWidth = min(layer*2,self._maxWidth)
+                if GrowthPattern.Slow in self._growthPattern:
+                    newWidth = min(layer+1,self._maxWidth)
+                else:
+                    newWidth = min(layer*2,self._maxWidth)
                 self._widen(newWidth,i)
                 
                 return ((i+1)==self._maxDepth)&(newWidth==self._maxWidth)
