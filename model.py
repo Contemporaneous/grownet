@@ -1,18 +1,28 @@
 import torch
 import torch.nn as nn
 import torch.nn.functional as F
+from enums import GrowthPattern
 
 class GrowNet(object):
 
-    def __init__(self,inputSize,outputSize,startLayers=[64,64],maxWidth=512,maxDepth=3):
+    def __init__(self,inputSize,outputSize,startLayers=[64,64],maxWidth=512,maxDepth=3,growthPattern=GrowthPattern.BreadthFirst):
         self._model = GrowNetSubModel(inputSize,outputSize,startLayers)
         self._inputSize = inputSize
         self._outputSize = outputSize
         self._currentLayers = startLayers
         self._maxWidth = maxWidth
         self._maxDepth = maxDepth
+        self._growthPattern = growthPattern
 
     def grow(self):
+        if self._growthPattern==GrowthPattern.BreadthFirst:
+            return self._growBreadthFirst()
+        elif self._growthPattern==GrowthPattern.DepthFirst:
+            return self._growDepthFirst()
+        else:
+            raise NotImplementedError('Growth Pattern %s not Implemented' % self._growthPattern)
+    
+    def _growBreadthFirst(self):
         for i, layer in enumerate(self._currentLayers):
             if layer!=self._maxWidth:
                 newWidth = min(layer*2,self._maxWidth)
@@ -25,7 +35,19 @@ class GrowNet(object):
             return False
         else:
             return True
+
+    def _growDepthFirst(self):
         
+        if len(self._currentLayers)<self._maxDepth:
+            self._deepen(max(1,self._currentLayers[-1]//2))
+            return False
+
+        for i, layer in enumerate(self._currentLayers):
+            if layer!=self._maxWidth:
+                newWidth = min(layer*2,self._maxWidth)
+                self._widen(newWidth,i)
+                
+                return ((i+1)==self._maxDepth)&(newWidth==self._maxWidth)
     
     def _widen(self,new_width,layer):
         size = self._currentLayers.copy()
