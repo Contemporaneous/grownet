@@ -22,16 +22,28 @@ class GrowNet(object):
 
         for name, layer in newModel.state_dict().items():
             alternate = self._model.state_dict()[name]
-            if layer.size()!=alternate.size():
+            if len(layer.size())==1:
+                layer[:alternate.size()[0]]=alternate
+            else:
+                layer[:alternate.size()[0],:alternate.size()[1]]=alternate
+        
+        self._model = newModel
+
+    def deepen(self, new_layer_width):
+        size = self._currentLayers.copy()
+        size.append(new_layer_width)
+
+        newModel = GrowNetSubModel(self._inputSize,self._outputSize,size)
+
+        for name, layer in newModel.state_dict().items():
+            if name in self._model.state_dict().keys():
+                alternate = self._model.state_dict()[name]
                 if len(layer.size())==1:
                     layer[:alternate.size()[0]]=alternate
                 else:
                     layer[:alternate.size()[0],:alternate.size()[1]]=alternate
-        
+            
         self._model = newModel
-
-    def deepen(self):
-        pass
         
 
 
