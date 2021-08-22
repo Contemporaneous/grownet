@@ -29,6 +29,8 @@ class GrowNet(object):
             if layer!=self._maxWidth:
                 if GrowthPattern.Slow in self._growthPattern:
                     newWidth = min(layer+1,self._maxWidth)
+                elif GrowthPattern.Fast in self._growthPattern:
+                    newWidth = self._maxWidth
                 else:
                     newWidth = min(layer*2,self._maxWidth)
                 self._widen(newWidth,i)
@@ -38,6 +40,8 @@ class GrowNet(object):
         if len(self._currentLayers)<self._maxDepth:
             if GrowthPattern.Slow in self._growthPattern:
                 newWith = 2
+            elif GrowthPattern.Fast in self._growthPattern:
+                newWidth = self._maxWidth
             else:
                 newWidth = self._maxWidth//4
             self._deepen(newWidth)
@@ -50,6 +54,8 @@ class GrowNet(object):
         if len(self._currentLayers)<self._maxDepth:
             if GrowthPattern.Slow in self._growthPattern:
                 newWidth = 2 
+            elif GrowthPattern.Fast in self._growthPattern:
+                newWidth = self._maxWidth
             else:
                 newWidth = max(1,self._currentLayers[-1]//2)
             
@@ -61,6 +67,8 @@ class GrowNet(object):
             if layer!=self._maxWidth:
                 if GrowthPattern.Slow in self._growthPattern:
                     newWidth = min(layer+1,self._maxWidth)
+                elif GrowthPattern.Fast in self._growthPattern:
+                    newWidth = self._maxWidth
                 else:
                     newWidth = min(layer*2,self._maxWidth)
                 self._widen(newWidth,i)
