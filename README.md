@@ -4,3 +4,4 @@ This repo is just an attempt at an idea of having a flexible basic Neural Networ
 
 TODO 
 - Build Trainer
+- Build Tests
